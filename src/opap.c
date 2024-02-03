@@ -132,6 +132,10 @@ OPAP_T create_opap(unsigned int width, unsigned int height,
     return ret;
 }
 
+void set_opap_shader(OPAP_T *opap, OSHADER shader) {
+    opap->dt_shader = shader;
+}
+
 void start_handle_opap(OPAP_T *opap) {
     if(opap->dt_ishandling) {
         OPAPERR("start_handle_opap warning", "opap is already handling");
