@@ -39,3 +39,28 @@ int main(int argc, char **argv) {
 ```
 
 see the documentation for more details
+
+to compile the test:
+```bash
+make
+```
+
+to compile shared library
+```bash
+make lib
+```
+
+to compile static library
+```bash
+make slib
+```
+
+to install shared library
+```bash
+make install
+```
+
+to install static library (builds static library and installs header)
+```bash
+make sinstall
+```
