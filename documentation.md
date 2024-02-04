@@ -111,7 +111,7 @@ void start_handle_opap(
 - end\_handle\_opap
 - + ends handling of opap and applies any changes to pixel\_display when opap\-\>needs\_updating is OTRUE
 ```
-void ends_handle_opap(
+void end_handle_opap(
     OPAP_T *opap /* opap handled */
 );
 ```
