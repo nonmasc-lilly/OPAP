@@ -22,6 +22,20 @@ this describes every function struct and type opap creates
 - + resolves to unsigned int, for use as x or y value in coord functions
 - COLOR : type macro
 - + resolves to unsigned int, for use as a 32 bit representation of four ODISPLAY units
+- UCODE : type macro
+- + resolves to unsigned int, for use as a UTF32 code
+- ASCII : type macro
+- + resolves to unsigned char, for use as an ASCII code
+- BYTE : type macro
+- + resolves to unsigned char, for use as byte memory
+- FUNCMODE : type enum
+- + a set of modes used by various state functions
+```C
+typedef enum func_modes {
+    OFGET, /* get state */
+    OFSET, /* set state */
+} FUNCMODE;
+```
 
 - OPAP\_T : type struct
 ```C
@@ -137,7 +151,61 @@ COLOR get_opap_coord(
 );
 ```
 
+- opap\_key\_callback : type func
+- + char callback for use by glfw
+```C
+void opap_key_callback(
+    GLFWwindow *window,     /* window mounted */
+    unsigned int codepoint  /* UTF32 codepoint */
+);
+```
 
+- opap\_mkey\_callback : type func
+- + key callback for use by glfw
+```C
+void opap_mkey_callback(
+    GLFWwindow *window, /* window mounted */
+    int key,            /* keycode */
+    int scancode,       /* scancode */
+    int action,         /* action type */
+    int mods            /* modifier keys */
+);
+```
+
+- opap\_key\_handling
+- + handles a windows ascii key press
+```C
+void opap_key_handling(
+    GLFWwindow *win, /* window to handle */
+    ASCII *io,       /* io port, depends on mode */
+    FUNCMODE mode    /* when OFGET sets *io to the
+                        last handled key of win
+                        when OFSET sets the handled
+                        key of win to *io */
+)
+```
+
+- opap\_special\_key\_handling
+- + opap\_key\_handling but for UCODE keys
+```C
+void opap_special_key_handling(
+    GLFWwindow *win, /* window to handle */
+    UCODE *io,       /* io port, depends on mode */
+    FUNCMODE mode    /* see opap_key_handling */
+);
+```
+
+- opap\_consume\_key
+- + gets the last handled key of an opaps winhandle, and then sets it to zero, returns the key gotten
+```C
+ASCII opap_consume_key(
+    OPAP_T *opap, /* opap to act on */
+    UCODE *dump,  /* is set to the last handled
+                     special key, the special key
+                     is also set to zero by
+                     the end of the function */
+);
+```
 
 
 ### NOTES

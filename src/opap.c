@@ -129,6 +129,8 @@ OPAP_T create_opap(unsigned int width, unsigned int height,
         (void*)(3*sizeof(float)));
     glEnableVertexAttribArray(1);
     glBindVertexArray(0); 
+    glfwSetCharCallback(ret.winhandle, opap_key_callback);
+    glfwSetKeyCallback(ret.winhandle, opap_mkey_callback);
     return ret;
 }
 
@@ -180,3 +182,116 @@ COLOR get_opap_coord(OPAP_T *opap, COORD x, COORD y) {
     return ((COLOR*)opap->pixel_display)[x+y*opap->resx];
 }
 
+void opap_mkey_callback(GLFWwindow *window, int key, int scancode,
+        int action, int mods) {
+  if(action == GLFW_PRESS)
+    switch(key) {
+    case GLFW_KEY_ESCAPE:
+        opap_key_callback(window, 27);
+        break;
+    case GLFW_KEY_ENTER:
+        opap_key_callback(window, 10);
+        break;
+    case GLFW_KEY_TAB:
+        opap_key_callback(window, '\t');
+        break;
+    case GLFW_KEY_BACKSPACE:
+        opap_key_callback(window, '\b');
+    }
+
+}
+
+void opap_key_callback(GLFWwindow *window, UCODE codepoint) {
+    ASCII input;
+    input = (codepoint & 0xFF);
+    opap_key_handling(window, &input, OFSET);
+    opap_special_key_handling(window, &codepoint, OFSET);
+}
+
+ASCII opap_consume_key(OPAP_T *opap, UCODE *dump) {
+    ASCII ret, z;
+    UCODE uz;
+    uz=0;
+    z=0;
+    opap_key_handling(opap->winhandle, &ret, OFGET);
+    opap_key_handling(opap->winhandle, &z, OFSET);
+    opap_special_key_handling(opap->winhandle, dump, OFGET);
+    opap_special_key_handling(opap->winhandle, &uz, OFSET);
+    return ret;
+}
+
+void opap_key_handling(GLFWwindow *window, ASCII *io,
+        FUNCMODE mode) {
+    int i;
+    static GLFWwindow **wins = 0;
+    static ASCII       *ios  = 0;
+    static COORD        sz   = 0;
+    if(wins == 0) {
+        wins = malloc(sizeof(window));
+        *wins = window;
+        ios = malloc(sizeof(ASCII));
+        *ios = 0;
+        sz = 1;
+    }
+    switch(mode) {
+    case OFSET:
+        for(i=0; i<sz; i++) {
+            if(wins[i] == window) {
+                ios[i] = *io;
+                return;
+            }
+        }
+        wins=realloc(wins, (sz+1)*sizeof(window));
+        wins[sz] = window;
+        ios=realloc(ios, (sz+1)*sizeof(ASCII));
+        ios[sz] = *io;
+        sz++;
+        break;
+    case OFGET:
+        for(i=0; i<sz; i++) {
+            if(wins[i] == window) {
+               *io = ios[i];
+                return;
+            }
+        }
+        *io = 0;
+        break;
+    }
+}
+
+void opap_special_key_handling(GLFWwindow *window, UCODE *io,
+        FUNCMODE mode) {
+    int i;
+    static GLFWwindow **wins = 0;
+    static UCODE       *ios  = 0;
+    static COORD        sz   = 0;
+    if(wins == 0) {
+        wins = malloc(sizeof(window));
+        *wins = window;
+        ios = malloc(sizeof(UCODE));
+        *ios = 0;
+        sz = 1;
+    }
+    switch(mode) {
+    case OFSET:
+        for(i=0; i<sz; i++) {
+            if(wins[i] == window) {
+                ios[i] = *io;
+                return;
+            }
+        }
+        wins = realloc(wins, sizeof(window)*(sz+1));
+        wins[sz] = window;
+        ios = realloc(ios, sizeof(UCODE)*(sz+1));
+        ios[sz] = *io;
+        sz++;
+    case OFGET:
+        for(i=0; i<sz; i++) {
+            if(wins[i] == window) {
+                *io = ios[i];
+                return;
+            }
+        }
+        *io = 0;
+    }
+}
